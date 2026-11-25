@@ -1,0 +1,6 @@
+/* ---------- Stripe ---------- */
+.sd-lock { margin: 0; padding: 0; border: 0; min-width: 0; }
+.sd-lock:disabled { opacity: .7; }
+.sd-stripe { margin: 0 0 6px; min-height: 56px; }
+.sd-express-wrap { display: grid; gap: 10px; }
+.sd-express-wrap[hidden] { display: none; }

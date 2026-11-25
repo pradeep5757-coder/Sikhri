@@ -1,0 +1,240 @@
+/* SikhRI donation form — visual layer on top of Mantine.
+   Tokens and measurements are copied 1:1 from the live page. */
+
+:root {
+  --gold: #BFA25A;
+  --gold-dark: #AD9150;
+  --gold-ink: #8F7534;
+  --ink: #212121;
+  --ink-2: #6B6B6B;
+  --line: #DDDDDD;
+  --hair: #EEEEEE;
+  --tint: #FAF9F5;
+  --tint-line: #E6E0D2;
+  --dark: #393E46;
+  --red: #C1442E;
+  --r: 8px;
+  --focus: 2px solid var(--gold-ink);
+}
+
+html, body { margin: 0; background: #fff; }
+body { font-size: 16px; line-height: 1.45; color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+/* ---------- page shell ---------- */
+.sd {
+  container-type: inline-size;
+  box-sizing: border-box;
+  max-width: 440px;
+  margin: 0 auto;
+  padding-block: 24px 32px;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  color: var(--ink);
+}
+.sd *, .sd *::before, .sd *::after { box-sizing: border-box; }
+.sd p { margin: 0 0 12px; }
+.sd-head { text-align: center; margin-bottom: 20px; }
+.sd-logo { display: block; height: 84px !important; width: auto !important; max-width: 100%; margin: 0 auto; }
+.sd .sd-h2 { margin: 28px 0 14px; font-size: 20px; line-height: 1.25; font-weight: 600; }
+.sd .sd-h2:focus { outline: none; }
+.sd-muted { color: var(--ink-2); font-size: 14px; }
+
+/* ---------- region ---------- */
+.sd .sd-region-line { display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 10px; margin: 0; font-size: 15px; color: var(--ink-2); }
+.sd-region-line strong { color: var(--ink); font-weight: 600; }
+.sd-region-list { margin-top: 12px; }
+.sd-region-opt { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 6px; border: 1px solid var(--line); border-radius: var(--r); background: #fff; color: var(--ink); }
+.sd-region-opt strong { font-weight: 600; }
+.sd-region-opt span { font-size: 13px; color: var(--ink-2); }
+.sd-region-opt[aria-pressed='true'] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+.sd-region-opt[aria-pressed='true'] strong { color: var(--gold-ink); }
+
+/* ---------- group legends (How often / Amount / yes-no) ---------- */
+.sd-group { margin: 0 0 14px; }
+.sd .sd-legend { display: block; margin-bottom: 10px; padding: 0; font-size: 16px; font-weight: 600; color: var(--ink); }
+.sd .sd-group-hint { margin: -4px 0 10px; font-size: 14px; color: var(--ink-2); }
+
+/* ---------- segmented radio (Radio.Card) ---------- */
+.sd-seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--line); border-radius: 9px; background: #fff; overflow: hidden; }
+.sd .sd-seg-opt {
+  display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 2px;
+  border: 0; border-radius: 7px; background: transparent; font-size: 15px; color: #555; text-align: center; white-space: nowrap;
+}
+.sd .sd-seg-opt[data-checked] { background: var(--gold); color: #fff; font-weight: 600; }
+.sd .sd-seg-opt:focus-visible { outline: var(--focus); outline-offset: -2px; }
+.has-error .sd-seg { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+
+/* ---------- amount chips ---------- */
+.sd-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 10px; }
+.sd .sd-chip {
+  display: flex; align-items: center; justify-content: center; height: 56px;
+  border: 1px solid var(--line); border-radius: var(--r); background: #fff; box-shadow: 0 2px 4px #00000021; font-size: 18px; color: var(--ink);
+}
+.sd .sd-chip[data-checked] { border: 2px solid var(--gold); color: var(--gold-ink); font-weight: 600; }
+.sd .sd-chip:focus-visible { outline: var(--focus); outline-offset: -2px; }
+
+/* custom amount */
+.sd-prefixed { display: flex; align-items: center; gap: 6px; height: 52px; padding: 0 15px; border: 1px solid var(--line); border-radius: var(--r); background: #fff; }
+.sd-prefixed > span { flex: 0 0 36px; }
+.sd-prefixed > span:last-child { text-align: right; }
+.sd .sd-prefixed input {
+  flex: 1; min-width: 0; min-height: 46px; padding: 0; border: 0; background: transparent; outline: 0; box-shadow: none;
+  font: inherit; font-size: 24px; font-weight: 600; text-align: center; color: var(--ink);
+}
+.sd .sd-prefixed input::placeholder { font-size: 16px; font-weight: 400; color: #8e8e8e; }
+.sd-prefixed:focus-within { outline: var(--focus); outline-offset: 2px; }
+.sd-prefixed.is-on { border: 2px solid var(--gold); padding: 0 14px; }
+.has-error .sd-prefixed { border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+
+/* ---------- floating-label fields (TextInput / Textarea / NativeSelect) ---------- */
+.sd .sd-float { position: relative; margin: 0 0 10px; }
+.sd .sd-float-label {
+  position: absolute; left: 14px; right: 14px; top: 17px; z-index: 1; margin: 0; padding: 0;
+  font-size: 16px; line-height: 22px; font-weight: 400; color: var(--ink-2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;
+  transition: top .12s, font-size .12s;
+}
+.sd .sd-float[data-select] .sd-float-label { right: 40px; }
+.sd .sd-float[data-floating] .sd-float-label { top: 6px; font-size: 12px; line-height: 18px; }
+@media (prefers-reduced-motion: reduce) { .sd .sd-float-label { transition: none; } }
+.sd-optional { font-weight: 400; color: var(--ink-2); }
+
+.sd .sd-input {
+  display: block; width: 100%; height: auto; min-height: 56px; padding: 24px 13px 8px;
+  border: 1px solid var(--line); border-radius: var(--r); background: #fff;
+  font: inherit; font-size: 16px; line-height: 1.45; color: var(--ink);
+}
+.sd textarea.sd-input { resize: vertical; padding-top: 26px; }
+.sd select.sd-input, .sd .sd-input[data-with-right-section] { padding-right: 40px; text-overflow: ellipsis; }
+.sd .sd-input:focus { border-color: var(--line); }
+.sd .sd-input:focus-visible { outline: var(--focus); outline-offset: 2px; }
+.sd .sd-input[data-error], .sd .sd-input[aria-invalid='true'] { color: var(--ink); border-color: var(--red); box-shadow: inset 0 0 0 1px var(--red); }
+.sd .sd-input::placeholder { color: transparent; }
+.sd .sd-select-chevron { color: var(--ink); }
+
+.sd .sd-error, .sd .sd-hint { margin: 6px 0 0; padding: 0; font-size: 14px; line-height: 1.45; }
+.sd .sd-error { color: var(--red); font-weight: 500; }
+.sd .sd-hint { color: var(--ink-2); }
+
+.sd-row { display: grid; grid-template-columns: 1fr; gap: 0 10px; }
+.sd-row--2 { grid-template-columns: 1fr 1fr; }
+@container (min-width: 380px) {
+  .sd-row { grid-template-columns: 1fr 1fr; }
+  .sd-row--3 { grid-template-columns: 1.4fr 1fr 1fr; }
+}
+
+/* ---------- buttons ---------- */
+.sd .sd-btn {
+  display: block; width: 100%; height: auto; min-height: 56px; margin-top: 24px; padding: 10px 16px;
+  border: 0; border-radius: 100px; background: var(--gold); color: #fff;
+  font-size: 17px; font-weight: 600; line-height: 1.25; transition: background .2s;
+}
+.sd .sd-btn:hover { background: var(--gold-dark); }
+.sd .sd-btn-label { white-space: normal; text-wrap: balance; overflow: visible; height: auto; }
+.sd .sd-btn--secondary { margin-top: 0; min-height: 52px; background: #fff; color: var(--gold-ink); box-shadow: inset 0 0 0 1px var(--gold); }
+.sd .sd-btn--secondary:hover { background: var(--gold); color: #fff; }
+.sd .sd-btn:focus-visible, .sd button:focus-visible, .sd a:focus-visible { outline: var(--focus); outline-offset: 2px; }
+
+.sd .sd-link {
+  padding: 6px 0; border: 0; background: none; font: inherit; font-weight: 500; color: var(--gold-ink);
+  text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.sd .sd-add { display: block; margin: -2px 0 12px; font-size: 15px; }
+
+.sd .sd-back {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 36px; margin: -8px 0 4px -4px; padding: 0 8px 0 4px;
+  border: 0; border-radius: 100px; background: none; color: var(--ink-2); font-size: 15px;
+}
+.sd .sd-back:hover { background: var(--tint); color: var(--ink); }
+
+/* ---------- comment / dedication ---------- */
+.sd-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.sd .sd-toggle {
+  display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: var(--r); background: #fff; color: var(--ink); font-size: 15px; line-height: 1.25;
+}
+.sd-toggle svg { flex: none; color: var(--gold); }
+.sd .sd-toggle[aria-pressed='true'] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); color: var(--gold-ink); font-weight: 600; }
+
+/* ---------- summary ---------- */
+.sd-sums { margin: 0 0 8px; border-top: 1px solid var(--hair); }
+.sd-sum { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 52px; padding: 8px 0; border-bottom: 1px solid var(--hair); }
+.sd .sd-sum p { margin: 0; overflow-wrap: anywhere; }
+.sd-sum-value { flex: none; display: flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; }
+.sd-sum--worth { border-bottom-color: var(--ink); font-weight: 500; }
+.sd-sum--total { font-weight: 600; }
+.sd .sd-mini {
+  height: auto; min-height: 30px; padding: 0 14px; border: 1px solid var(--line); border-radius: 100px; background: #fff;
+  box-shadow: 0 1px 3px #0000001f; color: var(--ink); font-size: 13px; font-weight: 600;
+}
+.sd .sd-mini:hover { background: var(--tint); }
+.sd-fee-edit { padding: 12px 0 14px; border-bottom: 1px solid var(--hair); }
+.sd .sd-fee-edit p { margin: 0 0 8px; font-size: 13px; }
+.sd-fee-row { display: flex; align-items: center; gap: 12px; }
+.sd-fee-row output { flex: none; min-width: 34px; font-size: 14px; font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; }
+.sd .sd-slider { flex: 1; min-width: 0; }
+.sd .sd-slider-track::before { background: #fff; border: 1px solid var(--line); }
+.sd .sd-slider-thumb { border: 2px solid #fff; background: var(--gold); box-shadow: 0 1px 3px #0000004d; }
+
+/* ---------- checkboxes ---------- */
+.sd .sd-check-body { align-items: flex-start; }
+.sd .sd-check-label { padding-left: 10px; font-size: inherit; line-height: inherit; color: inherit; }
+.sd .sd-check-input { cursor: pointer; }
+.sd .sd-optin { margin: 18px 0 0; font-size: 15px; line-height: 1.4; }
+.sd-inst { margin: 0 0 16px; }
+.sd-inst-fields { margin: 12px 0 18px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.sd-inst-fields .sd-float:last-child { margin-bottom: 0; }
+
+/* ---------- Gift Aid ---------- */
+.sd-ga-figures { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.sd-ga-figures > div { display: flex; flex-direction: column; gap: 2px; padding: 12px; border: 1px solid var(--line); border-radius: var(--r); background: #fff; }
+.sd-ga-figures strong { font-size: 24px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sd-ga-figures span { font-size: 13px; color: var(--ink-2); }
+.sd-ga-figures .is-up { border: 2px solid var(--gold); padding: 11px; }
+.sd-ga-figures .is-up strong { color: var(--gold-ink); }
+.sd-declaration { margin: 0 0 14px; padding: 13px; border: 1px solid var(--tint-line); border-radius: var(--r); background: var(--tint); }
+.sd .sd-declaration h3 { margin: 0 0 8px; font-size: 16px; font-weight: 600; }
+.sd .sd-declaration p { margin: 0 0 10px; font-size: 14px; color: var(--ink-2); }
+.sd .sd-declaration p:last-child { margin-bottom: 0; }
+.sd .sd-declaration .sd-check { margin: 4px 0 12px; color: var(--ink); font-size: 14px; }
+
+/* ---------- pay with ---------- */
+.sd-paywith { display: grid; gap: 10px; }
+.sd-express { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sd .sd-wallet { height: auto; min-height: 52px; border: 0; border-radius: 100px; background: var(--dark); color: #fff; font-size: 17px; font-weight: 600; }
+.sd .sd-wallet:hover { background: #2c3036; }
+.sd-or { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0; font-size: 14px; color: var(--ink-2); }
+.sd-or::before, .sd-or::after { content: ''; flex: 1; height: 1px; background: var(--hair); }
+.sd-ghost { display: flex; align-items: center; height: 56px; margin-bottom: 10px; padding: 0 13px; border: 1px solid var(--line); border-radius: var(--r); background: #fff; color: #8e8e8e; }
+.sd .sd-secure { display: flex; justify-content: center; align-items: center; gap: 6px; margin: 10px 0 0; font-size: 13px; color: var(--ink-2); }
+
+/* ---------- address suggestions ---------- */
+.sd-hits { margin: -6px 0 8px; padding: 4px; border: 1px solid var(--line); border-radius: var(--r); background: #fff; list-style: none; }
+.sd .sd-hits button { display: block; width: 100%; padding: 10px; border: 0; border-radius: 6px; background: none; color: var(--ink); text-align: left; }
+.sd .sd-hits button:hover { background: var(--tint); }
+.sd-hits-note { padding: 8px 10px 6px; border-top: 1px solid var(--hair); font-size: 13px; color: var(--ink-2); }
+
+/* ---------- thank you + share ---------- */
+.sd-thanks { padding: 28px 0 12px; text-align: center; }
+.sd-thanks-icon { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: var(--gold); color: #fff; }
+.sd .sd-thanks h2 { margin: 16px 0 10px; font-size: 28px; }
+.sd .sd-thanks h2:focus { outline: none; }
+.sd .sd-thanks p { margin: 0; }
+.sd-share { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--hair); }
+.sd .sd-share-title { margin: 0 0 4px; font-size: 17px; font-weight: 600; }
+.sd .sd-share-sub { margin: 0 0 16px; font-size: 14px; color: var(--ink-2); }
+.sd .sd-share-pill {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: auto; min-height: 52px; padding: 10px 16px;
+  border: 0; border-radius: 100px; background: #fff; color: var(--gold-ink); box-shadow: inset 0 0 0 1px var(--gold);
+  font-size: 17px; font-weight: 600; transition: background .15s, color .15s;
+}
+.sd .sd-share-pill:hover { background: var(--gold); color: #fff; }
+.sd .sd-share-copy { margin-top: 10px; font-size: 15px; }
+.sd-share-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.sd .sd-share-ic {
+  width: 44px; height: 44px; min-width: 44px; min-height: 44px; border: 1px solid var(--line); border-radius: 50%;
+  background: #fff; color: var(--ink); transition: background .15s, color .15s, border-color .15s;
+}
+.sd .sd-share-ic:hover { border-color: var(--gold); background: var(--gold); color: #fff; }
+.sd .sd-share-note { min-height: 20px; margin: 10px 0 0; font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
+

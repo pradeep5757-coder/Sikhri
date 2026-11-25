@@ -1,0 +1,188 @@
+/*
+ * SikhRI — record website donations in Zoho CRM (called by the Vercel API, never the browser).
+ *
+ * Create it: Zoho CRM > Setup > Developer Hub > Functions > + New Function
+ *   Name / API name: sikhri_record_donation   Category: Standalone
+ *   Argument: donation_data (String)          Paste this code > Save
+ *   ... > REST API > enable "API Key" > copy URL into Vercel env ZOHO_CRM_FUNCTION_URL
+ *
+ * donation_data.event:
+ *   payment_succeeded       -> find/create Contact, create or update the Donation (keyed by Stripe_Payment_Intent_Id)
+ *   refund | dispute | payment_failed -> update Payment_Status on the existing Donation
+ *   subscription_cancelled  -> update Subscription_Status on Donations with that Stripe_Subscription_Id
+ *
+ * PLACEHOLDERS: "Donations" module and field API names — replace with the real ones.
+ */
+string standalone.sikhri_record_donation(String donation_data)
+{
+	result = Map();
+	try
+	{
+		d = donation_data.toMap();
+		eventName = ifnull(d.get("event"),"payment_succeeded");
+		piId = ifnull(d.get("stripe_payment_intent_id"),"");
+		subId = ifnull(d.get("stripe_subscription_id"),"");
+
+		// ---------- status changes ----------
+		if(eventName == "subscription_cancelled")
+		{
+			if(subId == "")
+			{
+				result.put("status","ignored");
+				return result.toString();
+			}
+			rows = zoho.crm.searchRecords("Donations","(Stripe_Subscription_Id:equals:" + subId + ")");
+			for each  row in rows
+			{
+				zoho.crm.updateRecord("Donations",row.get("id"),{"Subscription_Status":"Cancelled"});
+			}
+			result.put("status","success");
+			result.put("updated",rows.size());
+			return result.toString();
+		}
+		existing = List();
+		if(piId != "")
+		{
+			existing = zoho.crm.searchRecords("Donations","(Stripe_Payment_Intent_Id:equals:" + piId + ")");
+		}
+		if(eventName != "payment_succeeded")
+		{
+			if(existing.size() == 0)
+			{
+				// Nothing recorded yet (e.g. a failed first attempt) — nothing to update.
+				result.put("status","ignored");
+				return result.toString();
+			}
+			upd = Map();
+			upd.put("Payment_Status",ifnull(d.get("payment_status"),""));
+			if(d.get("refunded_amount") != null)
+			{
+				upd.put("Refunded_Amount",d.get("refunded_amount").toDecimal());
+			}
+			zoho.crm.updateRecord("Donations",existing.get(0).get("id"),upd);
+			result.put("status","success");
+			result.put("donation_id",existing.get(0).get("id"));
+			return result.toString();
+		}
+
+		// ---------- successful payment ----------
+		email = ifnull(d.get("email"),"").trim().toLowerCase();
+		if(email == "")
+		{
+			result.put("status","error");
+			result.put("message","email missing");
+			return result.toString();
+		}
+		firstName = ifnull(d.get("first_name"),"");
+		lastName = ifnull(d.get("last_name"),"");
+		if(lastName == "")
+		{
+			lastName = "Donor";
+		}
+		street = (ifnull(d.get("address_line1"),"") + " " + ifnull(d.get("address_line2"),"")).trim();
+		contact = Map();
+		contact.put("First_Name",firstName);
+		contact.put("Last_Name",lastName);
+		contact.put("Email",email);
+		if(ifnull(d.get("phone"),"") != "")
+		{
+			contact.put("Phone",d.get("phone"));
+		}
+		if(street != "")
+		{
+			contact.put("Mailing_Street",street);
+			contact.put("Mailing_City",ifnull(d.get("city"),""));
+			contact.put("Mailing_State",ifnull(d.get("state"),""));
+			contact.put("Mailing_Zip",ifnull(d.get("postal_code"),""));
+			contact.put("Mailing_Country",ifnull(d.get("country"),""));
+		}
+		contact.put("Email_Opt_Out",ifnull(d.get("newsletter_opt_in"),false).toString() != "true");
+
+		contactId = "";
+		found = zoho.crm.searchRecords("Contacts","(Email:equals:" + email + ")");
+		if(found.size() > 0)
+		{
+			contactId = found.get(0).get("id");
+			zoho.crm.updateRecord("Contacts",contactId,contact);
+		}
+		else
+		{
+			created = zoho.crm.createRecord("Contacts",contact);
+			contactId = ifnull(created.get("id"),"");
+		}
+		if(contactId == "")
+		{
+			result.put("status","error");
+			result.put("message","could not create contact");
+			return result.toString();
+		}
+
+		currency = ifnull(d.get("currency"),"");
+		amount = ifnull(d.get("total_amount"),0).toDecimal();
+		donation = Map();
+		donation.put("Name",firstName + " " + lastName + " - " + currency + " " + amount + " (" + ifnull(d.get("gift_type"),"New Gift") + ")");
+		donation.put("Contact",{"id":contactId});
+		donation.put("Amount",ifnull(d.get("amount"),0).toDecimal());
+		donation.put("Fee_Amount",ifnull(d.get("fee_amount"),0).toDecimal());
+		donation.put("Total_Amount",amount);
+		donation.put("Gross_Amount",ifnull(d.get("gross_amount"),0).toDecimal());
+		donation.put("Stripe_Fee",ifnull(d.get("stripe_fee"),0).toDecimal());
+		donation.put("Net_Amount",ifnull(d.get("net_amount"),0).toDecimal());
+		donation.put("Currency_Code",currency);
+		donation.put("Frequency",ifnull(d.get("frequency"),""));
+		donation.put("Fund",ifnull(d.get("fund"),""));
+		donation.put("Gift_Type",ifnull(d.get("gift_type"),"New Gift"));
+		donation.put("Payment_Status","Paid");
+		donation.put("Payment_Method",ifnull(d.get("paid_with"),ifnull(d.get("payment_method"),"")));
+		donation.put("Gift_Aid",ifnull(d.get("gift_aid"),false).toString() == "true");
+		donation.put("Gift_Aid_Amount",ifnull(d.get("gift_aid_amount"),0).toDecimal());
+		donation.put("Comment",ifnull(d.get("comment"),""));
+		donation.put("Dedication_Name",ifnull(d.get("dedication_name"),""));
+		donation.put("Dedication_Email",ifnull(d.get("dedication_email"),""));
+		donation.put("Dedication_Message",ifnull(d.get("dedication_message"),""));
+		donation.put("Is_Institution",ifnull(d.get("is_institution"),false).toString() == "true");
+		donation.put("Institution_Type",ifnull(d.get("institution_type"),""));
+		donation.put("Institution_Name",ifnull(d.get("institution_name"),""));
+		donation.put("Region",ifnull(d.get("region"),""));
+		donation.put("Source",ifnull(d.get("source"),"SikhRI Website"));
+		donation.put("UTM_Source",ifnull(d.get("utm_source"),""));
+		donation.put("UTM_Medium",ifnull(d.get("utm_medium"),""));
+		donation.put("UTM_Campaign",ifnull(d.get("utm_campaign"),""));
+		donation.put("UTM_Content",ifnull(d.get("utm_content"),""));
+		donation.put("UTM_Term",ifnull(d.get("utm_term"),""));
+		donation.put("Stripe_Payment_Intent_Id",piId);
+		donation.put("Stripe_Charge_Id",ifnull(d.get("stripe_charge_id"),""));
+		donation.put("Stripe_Customer_Id",ifnull(d.get("stripe_customer_id"),""));
+		donation.put("Stripe_Subscription_Id",subId);
+		donation.put("Stripe_Invoice_Id",ifnull(d.get("stripe_invoice_id"),""));
+		donation.put("Receipt_URL",ifnull(d.get("receipt_url"),""));
+		donation.put("Paid_At",ifnull(d.get("paid_at"),""));
+
+		donationId = "";
+		if(existing.size() > 0)
+		{
+			donationId = existing.get(0).get("id");
+			zoho.crm.updateRecord("Donations",donationId,donation);
+		}
+		else
+		{
+			resp = zoho.crm.createRecord("Donations",donation);
+			donationId = ifnull(resp.get("id"),"");
+			if(donationId == "")
+			{
+				result.put("status","error");
+				result.put("message","could not create donation: " + resp.toString());
+				return result.toString();
+			}
+		}
+		result.put("status","success");
+		result.put("contact_id",contactId);
+		result.put("donation_id",donationId);
+	}
+	catch (e)
+	{
+		result.put("status","error");
+		result.put("message",e.toString());
+	}
+	return result.toString();
+}

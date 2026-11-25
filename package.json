@@ -1,0 +1,31 @@
+{
+  "name": "sikhri-donation-react",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "cert": "node scripts/generate-cert.js",
+    "predev": "node scripts/generate-cert.js --if-missing",
+    "dev": "vite",
+    "build": "vite build",
+    "prepreview": "node scripts/generate-cert.js --if-missing",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mantine/core": "^9.8.1",
+    "@mantine/hooks": "^9.8.1",
+    "@stripe/react-stripe-js": "^7.1.0",
+    "@stripe/stripe-js": "^10.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "stripe": "^23.2.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.3.0",
+    "mkcert": "^3.2.0",
+    "postcss": "^8.5.33",
+    "postcss-preset-mantine": "^1.18.0",
+    "postcss-simple-vars": "^7.0.1",
+    "vite": "^8.3.8"
+  }
+}
